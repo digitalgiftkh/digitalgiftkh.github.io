@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Google Sheet I/O 1</title>
+  <title>Sheet I/O</title>
+  <meta charset="UTF-8">
 </head>
 <body>
   <h2>Write to Google Sheet</h2>
@@ -14,33 +15,37 @@
   <div id="output"></div>
 
   <script>
-    const webAppUrl = "https://script.google.com/macros/s/AKfycbyDilzxKKz6pHFUdUkkIHekWMA31EtOeENC_HgnewqGI5UkGlVOy5ztD-xpcapKPivn/exec"; // Replace with your deployed Web App URL
+    const webAppUrl = "https://script.google.com/macros/s/AKfycbyDilzxKKz6pHFUdUkkIHekWMA31EtOeENC_HgnewqGI5UkGlVOy5ztD-xpcapKPivn/exec"; // ← Replace with your deployed URL
 
     function writeData() {
-      const name = document.getElementById("name").value;
-      const email = document.getElementById("email").value;
+      const name = encodeURIComponent(document.getElementById("name").value);
+      const email = encodeURIComponent(document.getElementById("email").value);
+      const url = `${webAppUrl}?action=write&name=${name}&email=${email}`;
 
-      fetch(webAppUrl, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded"
-        },
-        body: `action=write&name=${encodeURIComponent(name)}&email=${encodeURIComponent(email)}`
-      })
-      .then(res => res.text())
-      .then(msg => alert(msg));
+      fetch(url)
+        .then(res => res.text())
+        .then(msg => alert(msg))
+        .catch(err => alert("Fetch error: " + err));
     }
 
     function readData() {
-      fetch(webAppUrl + "?action=read")
+      fetch(`${webAppUrl}?action=read`)
         .then(res => res.json())
         .then(data => {
           let html = "<table border='1'><tr><th>Name</th><th>Email</th><th>Timestamp</th></tr>";
           for (let i = 1; i < data.length; i++) {
-            html += `<tr><td>${data[i][0]}</td><td>${data[i][1]}</td><td>${data[i][2]}</td></tr>`;
+            html += `<tr>
+              <td>${data[i][0]}</td>
+              <td>${data[i][1]}</td>
+              <td>${data[i][2]}</td>
+            </tr>`;
           }
           html += "</table>";
           document.getElementById("output").innerHTML = html;
+        })
+        .catch(err => {
+          console.error("Read error:", err);
+          document.getElementById("output").innerText = "Failed to load data.";
         });
     }
   </script>
