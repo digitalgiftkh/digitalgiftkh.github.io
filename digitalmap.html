@@ -738,7 +738,7 @@
                     const bounds = new L.LatLngBounds(
                         memories.map(memory => [memory.latitude, memory.longitude])
                     );
-                    map.fitBounds(bounds, { padding: [50, 50], maxZoom: 5 });
+                    map.fitBounds(bounds, { padding: [50, 50], maxZoom: 7 });
                 }
                 
                 // Hide loading screen and show content
@@ -785,7 +785,7 @@
         // Initialize the map
         function initMap() {
             // Start with Phnom Penh center but will be adjusted to markers later
-            map = L.map('map').setView([11.5564, 104.9282], 5);
+            map = L.map('map').setView([11.5564, 104.9282], 7);
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '&copy; OpenStreetMap contributors'
             }).addTo(map);
