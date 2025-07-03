@@ -738,7 +738,7 @@
                     const bounds = new L.LatLngBounds(
                         memories.map(memory => [memory.latitude, memory.longitude])
                     );
-                    map.fitBounds(bounds, { padding: [50, 50] });
+                    map.fitBounds(bounds, { padding: [50, 50], maxZoom: 5 });
                 }
                 
                 // Hide loading screen and show content
