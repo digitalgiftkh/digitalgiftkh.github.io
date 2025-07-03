@@ -188,7 +188,7 @@
             transform: translate(-50%, -50%);
             width: 90%;
             max-width: 1000px;
-            max-height: 90vh;
+            height: 90vh;
             background: linear-gradient(to bottom, #fff8f8, #fff0f0);
             border-radius: 15px;
             overflow: hidden;
@@ -200,13 +200,14 @@
         }
 
         .modal-header {
-            padding: 20px 30px;
+            padding: 15px 20px;
             background: linear-gradient(to right, #e75488, #c86dd7);
             color: white;
             display: flex;
             justify-content: space-between;
             align-items: center;
             border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+            flex-shrink: 0;
         }
 
         .close-modal {
@@ -223,45 +224,50 @@
         }
 
         .modal-body {
-            padding: 30px;
+            padding: 15px;
             overflow-y: auto;
-            max-height: calc(90vh - 80px);
             flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            height: calc(100% - 60px);
         }
 
         .memory-date {
             color: #a76ea7;
-            margin-bottom: 20px;
+            margin-bottom: 10px;
             font-style: italic;
-            font-size: 1.1em;
+            font-size: 1em;
             display: flex;
             align-items: center;
             gap: 8px;
+            flex-shrink: 0;
         }
 
         /* Gallery Styles */
         .gallery-container {
             position: relative;
             width: 100%;
-            margin-bottom: 25px;
+            flex-grow: 1;
             display: flex;
             flex-direction: column;
+            min-height: 0; /* Allows flex children to shrink properly */
         }
 
         .main-image-container {
             position: relative;
             width: 100%;
-            height: 500px;
+            flex-grow: 1;
             overflow: hidden;
             border-radius: 10px;
-            margin-bottom: 15px;
+            margin-bottom: 10px;
             background-color: #f8e8e8;
+            min-height: 200px;
         }
 
         .main-image {
             width: 100%;
             height: 100%;
-            object-fit: cover;
+            object-fit: contain;
             transition: opacity 0.5s ease;
             opacity: 0;
         }
@@ -274,9 +280,10 @@
             display: flex;
             gap: 10px;
             overflow-x: auto;
-            padding-bottom: 15px;
+            padding-bottom: 10px;
             scrollbar-width: thin;
             scrollbar-color: #e75488 #f8e8e8;
+            flex-shrink: 0;
         }
 
         .thumbnail-container::-webkit-scrollbar {
@@ -294,8 +301,8 @@
         }
 
         .thumbnail {
-            width: 100px;
-            height: 75px;
+            width: 80px;
+            height: 60px;
             object-fit: cover;
             border-radius: 5px;
             cursor: pointer;
@@ -440,16 +447,18 @@
 
         .memory-description {
             font-family: 'Playfair Display', serif;
-            font-size: 1.2em;
-            line-height: 1.7;
+            font-size: 1.1em;
+            line-height: 1.6;
             color: #5a3e5a;
-            margin-bottom: 25px;
-            padding: 20px;
+            margin-top: 10px;
+            padding: 15px;
             background: rgba(255, 240, 245, 0.6);
             border-radius: 10px;
             border-left: 4px solid #e75488;
-            max-width: 100%;
             overflow-wrap: break-word;
+            flex-shrink: 0;
+            overflow-y: auto;
+            max-height: 150px;
         }
 
         /* Floating hearts background */
@@ -558,19 +567,15 @@
                 max-width: 1200px;
             }
             
-            .main-image-container {
-                height: 600px;
-            }
-            
             .thumbnail {
-                width: 120px;
-                height: 90px;
+                width: 100px;
+                height: 75px;
             }
         }
 
         @media (max-width: 1200px) {
-            .main-image-container {
-                height: 450px;
+            .memory-description {
+                max-height: 120px;
             }
         }
 
@@ -587,13 +592,12 @@
                 width: 95%;
             }
             
-            .modal-body {
-                padding: 15px;
-                max-height: 65vh;
+            .modal-header {
+                padding: 12px 15px;
             }
             
-            .main-image-container {
-                height: 300px;
+            .modal-body {
+                padding: 10px;
             }
             
             .thumbnail {
@@ -611,8 +615,9 @@
             }
             
             .memory-description {
-                font-size: 1.1em;
-                padding: 15px;
+                font-size: 1em;
+                padding: 12px;
+                max-height: 100px;
             }
         }
 
@@ -632,10 +637,6 @@
                 padding: 6px 12px;
                 bottom: 15px;
                 right: 15px;
-            }
-            
-            .main-image-container {
-                height: 250px;
             }
             
             .thumbnail {
@@ -663,8 +664,13 @@
             }
             
             .memory-description {
-                font-size: 1em;
-                padding: 12px;
+                font-size: 0.95em;
+                padding: 10px;
+                max-height: 80px;
+            }
+            
+            .memory-date {
+                font-size: 0.9em;
             }
         }
     </style>
