@@ -72,7 +72,7 @@
             justify-content: center;
             align-items: center;
             color: white;
-            transition: opacity 0.8s ease, transform 0.8s ease;
+            transition: opacity 0.5s ease;
         }
 
         .loading-content {
@@ -723,66 +723,72 @@
             // Start loading progress simulation
             simulateProgress();
             
-            // Initialize the map
-            initMap();
-            
-            // Load memories from Google Sheets
-            await loadMemories();
-            
-            // Create markers
-            createMarkers();
-            
-            // Hide loading screen and show content
-            setTimeout(() => {
-                loadingScreen.style.opacity = '0';
-                loadingScreen.style.transform = 'scale(1.1)';
+            // Load memories from Google Sheets first
+            try {
+                const response = await axios.get(GOOGLE_SCRIPT_URL);
+                memories = response.data;
+                document.getElementById('memory-count').textContent = memories.length;
+                
+                // Initialize the map with markers after we have the data
+                initMap();
+                createMarkers();
+                
+                // Calculate bounds to center the map on all markers
+                if (memories.length > 0) {
+                    const bounds = new L.LatLngBounds(
+                        memories.map(memory => [memory.latitude, memory.longitude])
+                    );
+                    map.fitBounds(bounds, { padding: [50, 50] });
+                }
+                
+                // Hide loading screen and show content
                 setTimeout(() => {
-                    loadingScreen.style.display = 'none';
-                    
-                    // Show map with fade-in effect
-                    document.getElementById('map').classList.add('loaded');
-                    
-                    // Show UI elements
-                    document.querySelector('.map-title').classList.add('visible');
-                    document.querySelector('.footer').classList.add('visible');
-                    document.querySelector('.photo-counter').classList.add('visible');
+                    loadingScreen.style.opacity = '0';
+                    setTimeout(() => {
+                        loadingScreen.style.display = 'none';
+                        document.getElementById('map').classList.add('loaded');
+                        document.querySelector('.map-title').classList.add('visible');
+                        document.querySelector('.footer').classList.add('visible');
+                        document.querySelector('.photo-counter').classList.add('visible');
+                    }, 500);
                 }, 800);
-            }, 1000);
+            } catch (error) {
+                console.error('Error loading memories:', error);
+                document.getElementById('memory-count').textContent = 'Error loading';
+                // Still show the map even if data fails to load
+                initMap();
+                setTimeout(() => {
+                    loadingScreen.style.opacity = '0';
+                    setTimeout(() => {
+                        loadingScreen.style.display = 'none';
+                        document.getElementById('map').classList.add('loaded');
+                        document.querySelector('.map-title').classList.add('visible');
+                        document.querySelector('.footer').classList.add('visible');
+                    }, 500);
+                }, 800);
+            }
         }
 
-        // Simulate progress bar for loading screen
+        // Simulate progress bar for loading screen (shorter duration)
         function simulateProgress() {
             let progress = 0;
             const interval = setInterval(() => {
-                progress += Math.random() * 10;
+                progress += 20; // Faster progress
                 if (progress >= 100) {
                     progress = 100;
                     clearInterval(interval);
                 }
                 progressBar.style.width = progress + '%';
-            }, 300);
+            }, 150); // Shorter interval
         }
 
         // Initialize the map
         function initMap() {
-            map = L.map('map').setView([11.5564, 104.9282], 14);
+            // Start with Phnom Penh center but will be adjusted to markers later
+            map = L.map('map').setView([11.5564, 104.9282], 13);
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '&copy; OpenStreetMap contributors'
             }).addTo(map);
-        }
-
-        // Load memories from Google Sheets
-        async function loadMemories() {
-            try {
-                const response = await axios.get(GOOGLE_SCRIPT_URL);
-                memories = response.data;
-                
-                // Update memory count
-                document.getElementById('memory-count').textContent = memories.length;
-            } catch (error) {
-                console.error('Error loading memories:', error);
-                document.getElementById('memory-count').textContent = 'Error loading';
-            }
         }
 
         // Create markers on the map
