@@ -13,12 +13,32 @@
       box-sizing: border-box;
     }
     
-    body {
+    /* Safe area adjustments */
+    @supports(padding: max(0px)) {
+      body {
+        padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+      }
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
       background: linear-gradient(rgba(13, 27, 30, 0.7), rgba(28, 60, 43, 0.7)), 
                   url('https://images.unsplash.com/photo-1448375240586-882707db888b?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80');
       background-size: cover;
       background-position: center;
       background-attachment: fixed;
+      z-index: -2;
+      margin: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+      margin: 0;
+    }
+
+    body {
+      background: none;
       font-family: 'Playfair Display', serif;
       height: 100vh;
       display: flex;
@@ -38,8 +58,9 @@
       left: 0;
       width: 100%;
       height: 100%;
-      z-index: 0;
+      z-index: -1;
       pointer-events: none;
+      padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
     }
 
     .firefly {
@@ -100,7 +121,7 @@
       transform-origin: top;
       pointer-events: none;
       filter: drop-shadow(0 -2px 5px rgba(76, 140, 43, 0.5));
-      outline: none; /* Removed outline from flap */
+      outline: none;
     }
 
     .pocket {
@@ -110,7 +131,7 @@
       border-top: 90px solid transparent;
       border-bottom-left-radius: 6px;
       border-bottom-right-radius: 6px;
-      outline: none; /* Removed outline from pocket */
+      outline: none;
     }
 
     .letter {
@@ -124,7 +145,7 @@
       border-radius: 6px;
       box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5), 
                   0 2px 26px rgba(76, 140, 43, 0.3);
-      outline: none; /* Removed outline from letter */
+      outline: none;
     }
 
     .letter:after {
@@ -222,7 +243,7 @@
       pointer-events: none;
     }
 
-    /* Love Letter Popup - Adjusted to match standard version */
+    /* Love Letter Popup */
     .love-letter-popup {
       position: fixed;
       top: 50%;
