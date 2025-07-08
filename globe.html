@@ -472,6 +472,7 @@
         // Initialize Three.js scene
         let scene, camera, renderer, earthMesh, cloudsMesh;
         let controls, selectedLocation = null;
+        let raycaster, mouse, pins = [];
         
         function init() {
             updateLoadingText("Creating 3D scene...");
@@ -515,6 +516,13 @@
             
             // Add stars background
             createStars();
+            
+            // Add location pins
+            createLocationPins();
+            
+            // Setup raycaster for pin interaction
+            raycaster = new THREE.Raycaster();
+            mouse = new THREE.Vector2();
             
             // Setup UI interactions
             setupUI();
@@ -577,6 +585,37 @@
             starsGeometry.setAttribute('position', new THREE.Float32BufferAttribute(starsVertices, 3));
             const stars = new THREE.Points(starsGeometry, starsMaterial);
             scene.add(stars);
+        }
+        
+        function createLocationPins() {
+            const radius = 5;
+            const pinHeight = 0.3;
+            const pinGeometry = new THREE.ConeGeometry(0.05, pinHeight, 16);
+            const pinMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+            
+            locations.forEach(location => {
+                const phi = (90 - location.lat) * (Math.PI / 180);
+                const theta = (180 - location.lng) * (Math.PI / 180);
+                
+                const pin = new THREE.Mesh(pinGeometry, pinMaterial);
+                
+                // Position pin on surface of the Earth
+                pin.position.set(
+                    (radius + pinHeight/2) * Math.sin(phi) * Math.cos(theta),
+                    (radius + pinHeight/2) * Math.cos(phi),
+                    (radius + pinHeight/2) * Math.sin(phi) * Math.sin(theta)
+                );
+                
+                // Rotate pin to point outward from Earth's center
+                pin.lookAt(0, 0, 0);
+                pin.rotateX(Math.PI/2);
+                
+                // Store location data with the pin
+                pin.userData = { location };
+                
+                scene.add(pin);
+                pins.push(pin);
+            });
         }
         
         function setupUI() {
@@ -661,14 +700,21 @@
                 renderer.setSize(window.innerWidth, window.innerHeight);
             });
             
-            // Earth click handler
+            // Click handler for pins
             renderer.domElement.addEventListener('click', function(event) {
-                if (event.target === renderer.domElement) {
-                    const randomLoc = locations[Math.floor(Math.random() * locations.length)];
-                    flyToLocation(randomLoc.lat, randomLoc.lng);
-                    setTimeout(() => {
-                        showLocationDetails(randomLoc.name);
-                    }, 1000);
+                // Calculate mouse position in normalized device coordinates
+                mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+                mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+                
+                // Update the raycaster
+                raycaster.setFromCamera(mouse, camera);
+                
+                // Calculate objects intersecting the picking ray
+                const intersects = raycaster.intersectObjects(pins);
+                
+                if (intersects.length > 0) {
+                    const pin = intersects[0].object;
+                    showLocationDetails(pin.userData.location.name);
                 }
             });
         }
