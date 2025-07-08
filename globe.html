@@ -1,0 +1,1233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Earth Explorer | 3D Planet Visualization</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Roboto', sans-serif;
+        }
+        body {
+            overflow: hidden;
+            background: #121212;
+            color: #fff;
+        }
+        #earth-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+        .ui-panel {
+            position: fixed;
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            z-index: 100;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        #search-panel {
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 450px;
+            max-width: 90%;
+            transition: all 0.3s ease;
+        }
+        #search-panel:focus-within {
+            transform: translateX(-50%) scale(1.02);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+        }
+        #search-box {
+            width: 100%;
+            padding: 12px 20px;
+            border-radius: 30px;
+            border: none;
+            background: rgba(255, 255, 255, 0.95);
+            font-size: 16px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            color: #333;
+            transition: all 0.3s ease;
+        }
+        #search-box:focus {
+            outline: none;
+            background: white;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+        #search-results {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 15px;
+            display: none;
+            border-radius: 8px;
+            background: rgba(30, 30, 30, 0.9);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        .search-item {
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin: 5px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.05);
+        }
+        .search-item:hover {
+            background: rgba(65, 105, 225, 0.3);
+            transform: translateX(2px);
+        }
+        .search-item i {
+            margin-right: 12px;
+            min-width: 20px;
+            text-align: center;
+            color: #4CAF50;
+        }
+        #controls-panel {
+            bottom: 25px;
+            left: 25px;
+            display: flex;
+            gap: 8px;
+        }
+        .control-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: white;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 18px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        .control-btn:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: scale(1.1);
+        }
+        .control-btn.active {
+            background: #4CAF50;
+            transform: scale(1.1);
+        }
+        .control-btn i {
+            pointer-events: none;
+        }
+        #info-panel {
+            bottom: 25px;
+            right: 25px;
+            width: 300px;
+            padding: 20px;
+        }
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .info-row:last-child {
+            border-bottom: none;
+        }
+        .info-label {
+            color: #aaa;
+            font-size: 14px;
+        }
+        .info-value {
+            font-weight: 500;
+            color: #fff;
+            font-size: 15px;
+        }
+        #loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #121212;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            transition: opacity 0.5s;
+        }
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 6px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            border-top-color: #4CAF50;
+            animation: spin 1.2s linear infinite;
+            margin-bottom: 25px;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        #loading-text {
+            color: #fff;
+            margin-top: 20px;
+            font-size: 18px;
+            text-align: center;
+            max-width: 80%;
+        }
+        #layer-panel {
+            top: 25px;
+            right: 25px;
+            width: 220px;
+        }
+        .panel-title {
+            margin-bottom: 15px;
+            color: #4CAF50;
+            font-size: 16px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+        }
+        .panel-title i {
+            margin-right: 10px;
+        }
+        .layer-option {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            cursor: pointer;
+            border-radius: 8px;
+            margin: 5px 0;
+            transition: all 0.2s;
+            background: rgba(255, 255, 255, 0.05);
+        }
+        .layer-option:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+        .layer-option.active {
+            background: rgba(76, 175, 80, 0.2);
+        }
+        .layer-option i {
+            margin-right: 12px;
+            width: 20px;
+            text-align: center;
+            color: #4CAF50;
+        }
+        #overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: none;
+            z-index: 500;
+            backdrop-filter: blur(5px);
+        }
+        #location-details {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(20, 20, 20, 0.95);
+            border-radius: 12px;
+            padding: 25px;
+            width: 550px;
+            max-width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            z-index: 600;
+            display: none;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .details-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            align-items: center;
+        }
+        .details-header h3 {
+            font-size: 22px;
+            font-weight: 500;
+        }
+        .close-btn {
+            background: none;
+            border: none;
+            color: #aaa;
+            font-size: 24px;
+            cursor: pointer;
+            transition: color 0.2s;
+            padding: 5px;
+        }
+        .close-btn:hover {
+            color: white;
+            transform: scale(1.1);
+        }
+        .details-image {
+            width: 100%;
+            height: 220px;
+            background-size: cover;
+            background-position: center;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+        #location-description {
+            color: #ddd;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+        .location-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        .location-stat {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 12px;
+            border-radius: 8px;
+        }
+        .stat-label {
+            color: #aaa;
+            font-size: 13px;
+            margin-bottom: 5px;
+        }
+        .stat-value {
+            font-weight: 500;
+            font-size: 15px;
+        }
+        #compass {
+            position: fixed;
+            top: 25px;
+            left: 25px;
+            width: 65px;
+            height: 65px;
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+        .compass-arrow {
+            font-size: 28px;
+            transition: transform 0.2s;
+            color: #4CAF50;
+        }
+        #zoom-controls {
+            position: fixed;
+            right: 25px;
+            bottom: 160px;
+            display: flex;
+            flex-direction: column;
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 30px;
+            padding: 10px 6px;
+            z-index: 100;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .zoom-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: white;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            margin: 5px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            transition: all 0.2s;
+        }
+        .zoom-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.1);
+        }
+        #time-controls {
+            position: fixed;
+            top: 25px;
+            left: 120px;
+            width: 280px;
+            z-index: 100;
+        }
+        #time-slider {
+            width: 100%;
+            margin-top: 15px;
+            -webkit-appearance: none;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            outline: none;
+        }
+        #time-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            background: #4CAF50;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        .time-display-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .time-label {
+            display: flex;
+            align-items: center;
+            font-size: 14px;
+            color: #aaa;
+        }
+        .time-label i {
+            margin-right: 8px;
+            color: #4CAF50;
+        }
+        #time-display {
+            font-weight: 500;
+        }
+        /* Media Queries for Responsiveness */
+        @media (max-width: 768px) {
+            #search-panel {
+                width: 90%;
+            }
+            
+            #layer-panel, #time-controls {
+                top: 80px; /* Adjust top position to avoid overlap with search panel */
+                left: 50%;
+                transform: translateX(-50%);
+                width: 90%;
+                right: auto; /* Remove right property */
+            }
+            
+            #controls-panel {
+                bottom: 20px; /* Adjust bottom position */
+                left: 50%;
+                transform: translateX(-50%);
+                gap: 5px; /* Reduce gap between buttons */
+            }
+            
+            #compass {
+                top: 20px; /* Adjust top position */
+                left: 20px; /* Adjust left position */
+                transform: translateX(0); /* Remove transform */
+                bottom: auto; /* Remove bottom property */
+            }
+            
+            #zoom-controls {
+                right: 20px; /* Adjust right position */
+                bottom: 20px; /* Adjust bottom position, closer to the corner */
+                flex-direction: column; /* Keep as column for smaller vertical footprint */
+                transform: translateX(0); /* Remove transform */
+                padding: 8px 5px; /* Adjust padding */
+            }
+
+            #info-panel {
+                bottom: 20px; /* Adjust bottom position */
+                left: 50%;
+                transform: translateX(-50%);
+                width: 90%;
+                right: auto; /* Remove right property */
+            }
+
+            #location-details {
+                max-width: 95%;
+                width: 95%;
+                padding: 15px;
+            }
+
+            .details-header h3 {
+                font-size: 20px;
+            }
+
+            .close-btn {
+                font-size: 20px;
+            }
+
+            .details-image {
+                height: 180px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            #search-box {
+                padding: 10px 15px;
+                font-size: 14px;
+            }
+
+            .control-btn {
+                width: 40px;
+                height: 40px;
+                font-size: 16px;
+            }
+
+            .zoom-btn {
+                width: 40px;
+                height: 40px;
+                font-size: 18px;
+            }
+
+            #compass {
+                width: 55px;
+                height: 55px;
+            }
+            .compass-arrow {
+                font-size: 24px;
+            }
+            
+            #layer-panel, #time-controls, #info-panel {
+                padding: 10px;
+            }
+
+            .panel-title {
+                font-size: 14px;
+            }
+
+            .layer-option {
+                padding: 10px 12px;
+                font-size: 14px;
+            }
+
+            .info-label, .info-value {
+                font-size: 13px;
+            }
+
+            .time-label {
+                font-size: 13px;
+            }
+
+            #time-display {
+                font-size: 14px;
+            }
+
+            #location-description {
+                font-size: 14px;
+            }
+
+            .stat-label {
+                font-size: 12px;
+            }
+
+            .stat-value {
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="loading-screen">
+        <div class="loading-spinner"></div>
+        <h2 style="color: #fff; margin-bottom: 10px;">Earth Explorer</h2>
+        <p id="loading-text">Initializing 3D renderer...</p>
+    </div>
+
+    <div id="earth-container"></div>
+
+    <div id="compass">
+        <i class="compass-arrow fas fa-arrow-up"></i>
+        <div id="compass-degrees">N</div>
+    </div>
+
+    <div class="ui-panel" id="search-panel">
+        <input type="text" id="search-box" placeholder="Search for cities, landmarks, coordinates..." autocomplete="off">
+        <div id="search-results"></div>
+    </div>
+
+    <div class="ui-panel" id="layer-panel">
+        <div class="panel-title"><i class="fas fa-layer-group"></i> Map Layers</div>
+        <div class="layer-option active" data-layer="satellite">
+            <i class="fas fa-satellite-dish"></i> Satellite
+        </div>
+        <div class="layer-option" data-layer="terrain">
+            <i class="fas fa-mountain"></i> Terrain
+        </div>
+        <div class="layer-option" data-layer="roads">
+            <i class="fas fa-road"></i> Roads
+        </div>
+        <div class="layer-option" data-layer="night">
+            <i class="fas fa-moon"></i> Night Lights
+        </div>
+    </div>
+
+    <div class="ui-panel" id="time-controls">
+        <div class="time-display-container">
+            <span class="time-label"><i class="fas fa-clock"></i> Time of Day</span>
+            <span id="time-display">12:00 PM</span>
+        </div>
+        <input type="range" id="time-slider" min="0" max="24" step="0.1" value="12">
+    </div>
+
+    <div class="ui-panel" id="controls-panel">
+        <button class="control-btn active" id="rotate-btn" title="Rotate">
+            <i class="fas fa-sync-alt"></i>
+        </button>
+        <button class="control-btn" id="fly-btn" title="Fly Mode">
+            <i class="fas fa-paper-plane"></i>
+        </button>
+        <button class="control-btn" id="measure-btn" title="Measure Distance">
+            <i class="fas fa-ruler"></i>
+        </button>
+        <button class="control-btn" id="bookmark-btn" title="Save Location">
+            <i class="fas fa-bookmark"></i>
+        </button>
+    </div>
+
+    <div id="zoom-controls">
+        <button class="zoom-btn" id="zoom-in" title="Zoom In">
+            <i class="fas fa-plus"></i>
+        </button>
+        <button class="zoom-btn" id="zoom-out" title="Zoom Out">
+            <i class="fas fa-minus"></i>
+        </button>
+    </div>
+
+    <div class="ui-panel" id="info-panel">
+        <div class="info-row">
+            <span class="info-label">Latitude</span>
+            <span class="info-value" id="latitude">0°</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Longitude</span>
+            <span class="info-value" id="longitude">0°</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Altitude</span>
+            <span class="info-value" id="altitude">35,786 km</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">View Angle</span>
+            <span class="info-value" id="view-angle">10°</span>
+        </div>
+    </div>
+
+    <div id="overlay"></div>
+
+    <div id="location-details">
+        <div class="details-header">
+            <h3 id="location-title">Location Details</h3>
+            <button class="close-btn" id="close-details">&times;</button>
+        </div>
+        <div class="details-image" id="location-image"></div>
+        <p id="location-description">This is a description of the selected location.</p>
+        <div class="location-stats">
+            <div class="location-stat">
+                <div class="stat-label">Coordinates</div>
+                <div class="stat-value" id="location-coords">0°, 0°</div>
+            </div>
+            <div class="location-stat">
+                <div class="stat-label">Elevation</div>
+                <div class="stat-value" id="location-elevation">0 m</div>
+            </div>
+            <div class="location-stat">
+                <div class="stat-label">Type</div>
+                <div class="stat-value" id="location-type">Landmark</div>
+            </div>
+            <div class="location-stat">
+                <div class="stat-label">Population</div>
+                <div class="stat-value" id="location-population">-</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sample locations data - expanded with more details
+        const locations = [
+            {
+                name: "Eiffel Tower",
+                lat: 48.8584,
+                lng: 2.2945,
+                type: "landmark",
+                description: "The Eiffel Tower is a wrought-iron lattice tower on the Champ de Mars in Paris, France. It is named after the engineer Gustave Eiffel, whose company designed and built the tower. Constructed in 1889 as the entrance arch to the 1889 World's Fair, it has become a global cultural icon of France and one of the most recognizable structures in the world.",
+                image: "https://images.unsplash.com/photo-1431274172761-fca41d930114?ixlib=rb-1.2.1&auto=format&fit=crop&w=1000&q=80",
+                elevation: "300 m",
+                population: "N/A",
+                country: "France"
+            },
+            {
+                name: "Statue of Liberty",
+                lat: 40.6892,
+                lng: -74.0445,
+                type: "landmark",
+                description: "The Statue of Liberty is a colossal neoclassical sculpture on Liberty Island in New York Harbor within New York City. The statue was designed by French sculptor Frédéric Auguste Bartholdi and its metal framework was built by Gustave Eiffel. The statue was dedicated on October 28, 1886 as a gift to the United States from the people of France.",
+                image: "https://images.unsplash.com/photo-1499856871958-5b9627545d1a?ixlib=rb-1.2.1&auto=format&fit=crop&w=1000&q=80",
+                elevation: "93 m",
+                population: "N/A",
+                country: "United States"
+            },
+            {
+                name: "Great Pyramid of Giza",
+                lat: 29.9792,
+                lng: 31.1342,
+                type: "landmark",
+                description: "The Great Pyramid of Giza is the oldest and largest of the pyramids in the Giza pyramid complex bordering present-day Giza in Greater Cairo, Egypt. It is the oldest of the Seven Wonders of the Ancient World, and the only one to remain largely intact. Egyptologists believe it was built as a tomb for the Fourth Dynasty Egyptian pharaoh Khufu over a 20-year period concluding around 2560 BCE.",
+                image: "https://images.unsplash.com/photo-1503177119275-0ee32b63fb8a?ixlib=rb-1.2.1&auto=format&fit=crop&w=1000&q=80",
+                elevation: "138 m",
+                population: "N/A",
+                country: "Egypt"
+            },
+            {
+                name: "Mount Everest",
+                lat: 27.9881,
+                lng: 86.9250,
+                type: "mountain",
+                description: "Mount Everest is Earth's highest mountain above sea level, located in the Mahalangur Himal sub-range of the Himalayas. The China-Nepal border runs across its summit point. Its elevation of 8,848.86 m was most recently established in 2020 by the Chinese and Nepali authorities. Everest attracts many climbers, including highly experienced mountaineers.",
+                image: "https://images.unsplash.com/photo-1587135991091-082eebf57ffc?ixlib=rb-1.2.1&auto=format&fit=crop&w=1000&q=80",
+                elevation: "8,848 m",
+                population: "N/A",
+                country: "Nepal/China"
+            },
+            {
+                name: "Sydney Opera House",
+                lat: -33.8568,
+                lng: 151.2153,
+                type: "landmark",
+                description: "The Sydney Opera House is a multi-venue performing arts centre at Sydney Harbour in Sydney, New South Wales, Australia. It is one of the 20th century's most famous and distinctive buildings. Designed by Danish architect Jørn Utzon, the facility formally opened on 20 October 1973 after a gestation beginning with Utzon's 1957 selection as winner of an international design competition.",
+                image: "https://images.unsplash.com/photo-1524820197278-540916411e20?ixlib=rb-1.2.1&auto=format&fit=crop&w=1000&q=80",
+                elevation: "20 m",
+                population: "N/A",
+                country: "Australia"
+            },
+            {
+                name: "New York City",
+                lat: 40.7128,
+                lng: -74.0060,
+                type: "city",
+                description: "New York City comprises 5 boroughs sitting where the Hudson River meets the Atlantic Ocean. At its core is Manhattan, a densely populated borough that's among the world's major commercial, financial and cultural centers. Its iconic sites include skyscrapers such as the Empire State Building and sprawling Central Park. Broadway theater is staged in neon-lit Times Square.",
+                image: "https://images.unsplash.com/photo-1485871981521-5b1fd3805eee?ixlib=rb-1.2.1&auto=format&fit=crop&w=1000&q=80",
+                elevation: "10 m",
+                population: "8.4 million",
+                country: "United States"
+            },
+            {
+                name: "Tokyo",
+                lat: 35.6762,
+                lng: 139.6503,
+                type: "city",
+                description: "Tokyo, Japan's busy capital, mixes the ultramodern and the traditional, from neon-lit skyscrapers to historic temples. The opulent Meiji Shinto Shrine is known for its towering gate and surrounding woods. The Imperial Palace sits amid large public gardens. The city's many museums offer exhibits ranging from classical art to a reconstructed kabuki theater.",
+                image: "https://images.unsplash.com/photo-1542051841857-5f90071e7989?ixlib=rb-1.2.1&auto=format&fit=crop&w=1000&q=80",
+                elevation: "40 m",
+                population: "13.9 million",
+                country: "Japan"
+            },
+            {
+                name: "Grand Canyon",
+                lat: 36.1069,
+                lng: -112.1129,
+                type: "natural",
+                description: "The Grand Canyon in Arizona is a natural formation distinguished by layered bands of red rock, revealing millions of years of geological history in cross-section. Vast in scale, the canyon averages 10 miles across and a mile deep along its 277-mile length. Much of the area is a national park, with Colorado River white-water rapids and sweeping vistas.",
+                image: "https://images.unsplash.com/photo-1509316785289-025107a2dc08?ixlib=rb-1.2.1&auto=format&fit=crop&w=1000&q=80",
+                elevation: "2,600 m",
+                population: "N/A",
+                country: "United States"
+            },
+            {
+                name: "Amazon Rainforest",
+                lat: -3.4653,
+                lng: -62.2159,
+                type: "natural",
+                description: "The Amazon rainforest, covering much of northwestern Brazil and extending into Colombia, Peru and other South American countries, is the world's largest tropical rainforest, famed for its biodiversity. It's crisscrossed by thousands of rivers, including the powerful Amazon. River towns, with 19th-century architecture from rubber-boom days, include Manaus and Belém in Brazil and Leticia in Colombia.",
+                image: "https://images.unsplash.com/photo-1584696049838-8e39294120e5?ixlib=rb-1.2.1&auto=format&fit=crop&w=1000&q=80",
+                elevation: "100 m",
+                population: "N/A",
+                country: "Brazil"
+            },
+            {
+                name: "Great Barrier Reef",
+                lat: -18.2871,
+                lng: 147.6992,
+                type: "natural",
+                description: "The Great Barrier Reef is the world's largest coral reef system composed of over 2,900 individual reefs and 900 islands stretching for over 2,300 kilometres over an area of approximately 344,400 square kilometres. The reef is located in the Coral Sea, off the coast of Queensland, Australia.",
+                image: "https://images.unsplash.com/photo-1544551763-46a013bb70d5?ixlib=rb-1.2.1&auto=format&fit=crop&w=1000&q=80",
+                elevation: "Sea level",
+                population: "N/A",
+                country: "Australia"
+            }
+        ];
+        // Initialize Three.js scene
+        let scene, camera, renderer, earthMesh, cloudsMesh;
+        let controls, pointOfInterest, isRotating = true;
+        let currentLat = 0, currentLng = 0, currentZoom = 35.786;
+        let selectedLocation = null;
+        
+        function init() {
+            updateLoadingText("Creating 3D scene...");
+            
+            // Create scene
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x000000);
+            
+            // Create camera
+            camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.z = 15;
+            
+            // Create renderer with better quality settings
+            renderer = new THREE.WebGLRenderer({
+                antialias: true,
+                powerPreference: "high-performance",
+                logarithmicDepthBuffer: true
+            });
+            renderer.setPixelRatio(window.devicePixelRatio || 1);
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            renderer.gammaOutput = true;
+            renderer.gammaFactor = 2.2;
+            document.getElementById('earth-container').appendChild(renderer.domElement);
+            
+            // Add lighting
+            const ambientLight = new THREE.AmbientLight(0x404040, 1.5);
+            scene.add(ambientLight);
+            
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 1.2);
+            directionalLight.position.set(5, 3, 5);
+            directionalLight.castShadow = true;
+            directionalLight.shadow.mapSize.width = 2048;
+            directionalLight.shadow.mapSize.height = 2048;
+            scene.add(directionalLight);
+            
+            const light = new THREE.PointLight(0xffffff, 0.2);
+            light.position.set(0, 20, 0);
+            scene.add(light);
+            
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+            controls.rotateSpeed = 0.5;
+            controls.minDistance = 5;
+            controls.maxDistance = 50;
+            controls.maxPolarAngle = Math.PI;
+            controls.minPolarAngle = 0;
+            
+            updateLoadingText("Loading Earth textures...");
+            
+            // Create Earth with improved materials
+            createEarth();
+            
+            // Add stars background with more density
+            createStars();
+            
+            // Setup UI interactions
+            setupUI();
+            
+            // Start animation loop
+            animate();
+            
+            // Hide loading screen when everything is ready
+            setTimeout(() => {
+                document.getElementById('loading-screen').style.opacity = '0';
+                setTimeout(() => {
+                    document.getElementById('loading-screen').style.display = 'none';
+                }, 500);
+            }, 1500);
+        }
+        
+        function createEarth() {
+            const radius = 5;
+            const geometry = new THREE.SphereGeometry(radius, 128, 128);
+            
+            // Use better quality earth textures
+            const textureLoader = new THREE.TextureLoader();
+            
+            const earthMaterial = new THREE.MeshStandardMaterial({
+                map: textureLoader.load('https://threejs.org/examples/textures/planets/earth_atmos_2048.jpg'),
+                bumpMap: textureLoader.load('https://threejs.org/examples/textures/planets/earth_normal_2048.jpg'),
+                bumpScale: 0.05,
+                roughnessMap: textureLoader.load('https://threejs.org/examples/textures/planets/earth_specular_2048.jpg'),
+                metalness: 0.1,
+                roughness: 0.8,
+                displacementScale: 0.1
+            });
+            
+            earthMesh = new THREE.Mesh(geometry, earthMaterial);
+            earthMesh.castShadow = true;
+            earthMesh.receiveShadow = true;
+            scene.add(earthMesh);
+            
+            // Create atmosphere/clouds effect
+            const cloudsGeometry = new THREE.SphereGeometry(radius * 1.005, 128, 128);
+            const cloudsMaterial = new THREE.MeshStandardMaterial({
+                map: textureLoader.load('https://threejs.org/examples/textures/planets/earth_clouds_1024.png'),
+                transparent: true,
+                opacity: 0.3,
+                alphaMap: textureLoader.load('https://threejs.org/examples/textures/planets/earth_clouds_1024.png'),
+                side: THREE.DoubleSide,
+                blending: THREE.AdditiveBlending
+            });
+            
+            cloudsMesh = new THREE.Mesh(cloudsGeometry, cloudsMaterial);
+            scene.add(cloudsMesh);
+            
+            // Add water effect
+            const waterGeometry = new THREE.SphereGeometry(radius, 128, 128);
+            const waterMaterial = new THREE.MeshStandardMaterial({
+                color: 0x44aadd,
+                transparent: true,
+                opacity: 0.2,
+                metalness: 0.7,
+                roughness: 0.1,
+                side: THREE.DoubleSide
+            });
+            
+            const waterMesh = new THREE.Mesh(waterGeometry, waterMaterial);
+            scene.add(waterMesh);
+        }
+        
+        function createStars() {
+            const starsGeometry = new THREE.BufferGeometry();
+            const starsMaterial = new THREE.PointsMaterial({
+                color: 0xffffff,
+                size: 0.15,
+                sizeAttenuation: true,
+                transparent: true
+            });
+            
+            const starsVertices = [];
+            for (let i = 0; i < 10000; i++) {
+                const x = (Math.random() - 0.5) * 2000;
+                const y = (Math.random() - 0.5) * 2000;
+                const z = (Math.random() - 0.5) * 2000;
+                starsVertices.push(x, y, z);
+            }
+            
+            starsGeometry.setAttribute('position', new THREE.Float32BufferAttribute(starsVertices, 3));
+            const stars = new THREE.Points(starsGeometry, starsMaterial);
+            scene.add(stars);
+        }
+        
+        function setupUI() {
+            // Enhanced search functionality
+            const searchBox = document.getElementById('search-box');
+            const searchResults = document.getElementById('search-results');
+            let searchDebounce;
+            searchBox.addEventListener('input', function() {
+                clearTimeout(searchDebounce);
+                const query = this.value.toLowerCase().trim();
+                
+                searchDebounce = setTimeout(() => {
+                    searchResults.innerHTML = '';
+                    if (query.length > 1) {
+                        const filteredLocations = locations.filter(loc => 
+                            loc.name.toLowerCase().includes(query) ||
+                            loc.country.toLowerCase().includes(query)
+                        );
+
+                        if (filteredLocations.length > 0) {
+                            filteredLocations.forEach(loc => {
+                                const item = document.createElement('div');
+                                item.classList.add('search-item');
+                                let icon = '';
+                                if (loc.type === 'city') icon = '<i class="fas fa-city"></i>';
+                                else if (loc.type === 'landmark') icon = '<i class="fas fa-monument"></i>';
+                                else if (loc.type === 'mountain') icon = '<i class="fas fa-mountain"></i>';
+                                else if (loc.type === 'natural') icon = '<i class="fas fa-tree"></i>';
+                                item.innerHTML = `${icon} ${loc.name} <span style="font-size: 0.8em; color: #aaa; margin-left: auto;">${loc.country}</span>`;
+                                item.addEventListener('click', () => {
+                                    flyToLocation(loc.lat, loc.lng);
+                                    searchBox.value = loc.name;
+                                    searchResults.style.display = 'none';
+                                    showLocationDetails(loc);
+                                });
+                                searchResults.appendChild(item);
+                            });
+                            searchResults.style.display = 'block';
+                        } else {
+                            searchResults.style.display = 'none';
+                        }
+                    } else {
+                        searchResults.style.display = 'none';
+                    }
+                }, 300);
+            });
+
+            searchBox.addEventListener('focus', () => {
+                if (searchResults.children.length > 0 && searchBox.value.length > 1) {
+                    searchResults.style.display = 'block';
+                }
+            });
+
+            searchBox.addEventListener('blur', (event) => {
+                // Delay hiding to allow click event on search results
+                setTimeout(() => {
+                    if (!event.relatedTarget || !event.relatedTarget.closest('#search-results')) {
+                        searchResults.style.display = 'none';
+                    }
+                }, 100);
+            });
+
+            // Close search results if clicked outside
+            document.addEventListener('click', (event) => {
+                if (!searchPanel.contains(event.target) && !searchResults.contains(event.target)) {
+                    searchResults.style.display = 'none';
+                }
+            });
+
+            // Control buttons
+            const rotateBtn = document.getElementById('rotate-btn');
+            const flyBtn = document.getElementById('fly-btn');
+            const measureBtn = document.getElementById('measure-btn');
+            const bookmarkBtn = document.getElementById('bookmark-btn');
+
+            rotateBtn.addEventListener('click', () => {
+                isRotating = !isRotating;
+                rotateBtn.classList.toggle('active', isRotating);
+                // controls.autoRotate = isRotating; // Enable/disable Three.js auto-rotate
+                // controls.update();
+            });
+
+            // Layer options
+            document.querySelectorAll('.layer-option').forEach(option => {
+                option.addEventListener('click', function() {
+                    document.querySelectorAll('.layer-option').forEach(opt => opt.classList.remove('active'));
+                    this.classList.add('active');
+                    const layer = this.dataset.layer;
+                    updateEarthLayer(layer);
+                });
+            });
+
+            // Time slider
+            const timeSlider = document.getElementById('time-slider');
+            const timeDisplay = document.getElementById('time-display');
+            timeSlider.addEventListener('input', function() {
+                const hour = parseFloat(this.value);
+                updateTimeOfDay(hour);
+            });
+            updateTimeOfDay(12); // Initialize time
+
+            // Zoom controls
+            document.getElementById('zoom-in').addEventListener('click', () => zoom(1));
+            document.getElementById('zoom-out').addEventListener('click', () => zoom(-1));
+
+            // Location details panel close button
+            document.getElementById('close-details').addEventListener('click', hideLocationDetails);
+            document.getElementById('overlay').addEventListener('click', hideLocationDetails);
+        }
+
+        function updateEarthLayer(layer) {
+            const textureLoader = new THREE.TextureLoader();
+            let newMap, newSpecular, newNormal, newLight;
+
+            switch (layer) {
+                case 'satellite':
+                    newMap = 'https://threejs.org/examples/textures/planets/earth_atmos_2048.jpg';
+                    newNormal = 'https://threejs.org/examples/textures/planets/earth_normal_2048.jpg';
+                    newSpecular = 'https://threejs.org/examples/textures/planets/earth_specular_2048.jpg';
+                    newLight = null; // No night light
+                    break;
+                case 'terrain':
+                    newMap = 'https://threejs.org/examples/textures/planets/earth_lights_2048.png'; // Using lights as a proxy for terrain detail
+                    newNormal = 'https://threejs.org/examples/textures/planets/earth_normal_2048.jpg';
+                    newSpecular = 'https://threejs.org/examples/textures/planets/earth_specular_2048.jpg';
+                    newLight = null;
+                    break;
+                case 'roads':
+                    // This is a simplified example. Real road layers would be complex.
+                    newMap = 'https://threejs.org/examples/textures/planets/earth_daymap.jpg'; // Default daymap
+                    newNormal = 'https://threejs.org/examples/textures/planets/earth_normal_2048.jpg';
+                    newSpecular = 'https://threejs.org/examples/textures/planets/earth_specular_2048.jpg';
+                    newLight = null;
+                    break;
+                case 'night':
+                    newMap = 'https://threejs.org/examples/textures/planets/earth_nightmap_4096.jpg'; // Night map
+                    newNormal = 'https://threejs.org/examples/textures/planets/earth_normal_2048.jpg';
+                    newSpecular = 'https://threejs.org/examples/textures/planets/earth_specular_2048.jpg';
+                    newLight = 'https://threejs.org/examples/textures/planets/earth_lights_2048.png'; // City lights
+                    break;
+                default:
+                    return;
+            }
+
+            // Update earth mesh materials
+            earthMesh.material.map = textureLoader.load(newMap);
+            earthMesh.material.normalMap = textureLoader.load(newNormal);
+            earthMesh.material.specularMap = textureLoader.load(newSpecular);
+            
+            if (layer === 'night' && newLight) {
+                if (!earthMesh.material.emissiveMap) {
+                    earthMesh.material.emissive = new THREE.Color(0xffffff);
+                }
+                earthMesh.material.emissiveMap = textureLoader.load(newLight);
+                earthMesh.material.emissiveIntensity = 1.0;
+            } else {
+                earthMesh.material.emissiveMap = null;
+                earthMesh.material.emissiveIntensity = 0;
+            }
+            
+            earthMesh.material.needsUpdate = true;
+        }
+
+        function updateTimeOfDay(hour) {
+            const timeDisplay = document.getElementById('time-display');
+            const ampm = hour >= 12 && hour < 24 ? 'PM' : 'AM';
+            let displayHour = hour % 12;
+            if (displayHour === 0) displayHour = 12;
+            const minutes = Math.round((hour - Math.floor(hour)) * 60);
+            const displayMinutes = minutes < 10 ? '0' + minutes : minutes;
+            timeDisplay.textContent = `${Math.floor(displayHour)}:${displayMinutes} ${ampm}`;
+
+            // Adjust light source based on time of day (simplified)
+            const lightAngle = (hour / 24) * Math.PI * 2; // Full circle over 24 hours
+            const lightDistance = 5; // Distance from earth center
+            const directionalLight = scene.children.find(obj => obj instanceof THREE.DirectionalLight);
+            if (directionalLight) {
+                directionalLight.position.set(
+                    Math.sin(lightAngle) * lightDistance,
+                    0,
+                    Math.cos(lightAngle) * lightDistance
+                );
+            }
+        }
+
+        function flyToLocation(lat, lng) {
+            const earthRadius = 5;
+            const targetDistance = 8; // Distance from earth surface
+            
+            // Convert lat/lng to Cartesian coordinates on a sphere
+            const phi = (90 - lat) * Math.PI / 180;
+            const theta = (lng + 180) * Math.PI / 180;
+
+            const x = -(earthRadius + targetDistance) * Math.sin(phi) * Math.cos(theta);
+            const z = (earthRadius + targetDistance) * Math.sin(phi) * Math.sin(theta);
+            const y = (earthRadius + targetDistance) * Math.cos(phi);
+
+            // Animate camera position
+            new TWEEN.Tween(camera.position)
+                .to({ x: x, y: y, z: z }, 2000)
+                .easing(TWEEN.Easing.Quadratic.InOut)
+                .onUpdate(() => {
+                    controls.update(); // Update controls during tween
+                })
+                .start();
+
+            // Animate controls target to look at the location
+            new TWEEN.Tween(controls.target)
+                .to(earthMesh.position, 2000) // Keep looking at the center of the earth for simplicity
+                .easing(TWEEN.Easing.Quadratic.InOut)
+                .onUpdate(() => {
+                    controls.update();
+                })
+                .start();
+        }
+
+        function showLocationDetails(location) {
+            selectedLocation = location;
+            document.getElementById('location-title').textContent = location.name;
+            document.getElementById('location-image').style.backgroundImage = `url('${location.image}')`;
+            document.getElementById('location-description').textContent = location.description;
+            document.getElementById('location-coords').textContent = `${location.lat.toFixed(4)}°, ${location.lng.toFixed(4)}°`;
+            document.getElementById('location-elevation').textContent = location.elevation;
+            document.getElementById('location-type').textContent = location.type.charAt(0).toUpperCase() + location.type.slice(1);
+            document.getElementById('location-population').textContent = location.population;
+
+            document.getElementById('overlay').style.display = 'block';
+            document.getElementById('location-details').style.display = 'block';
+        }
+
+        function hideLocationDetails() {
+            document.getElementById('overlay').style.display = 'none';
+            document.getElementById('location-details').style.display = 'none';
+            selectedLocation = null;
+        }
+
+        function zoom(direction) {
+            const zoomAmount = 2; // Adjust as needed
+            controls.dollyIn(direction * zoomAmount);
+            controls.update();
+        }
+
+        function updateCompass() {
+            // Get camera direction
+            const cameraDirection = new THREE.Vector3();
+            camera.getWorldDirection(cameraDirection);
+
+            // Project direction onto the XY plane (earth's equatorial plane)
+            cameraDirection.y = 0; // Ignore vertical component for 2D compass
+            cameraDirection.normalize();
+
+            // Calculate angle relative to North (positive Z axis in Three.js for north)
+            const north = new THREE.Vector3(0, 0, 1);
+            let angle = Math.atan2(cameraDirection.x, cameraDirection.z) * (180 / Math.PI);
+            if (angle < 0) angle += 360;
+
+            const compassArrow = document.querySelector('.compass-arrow');
+            compassArrow.style.transform = `rotate(${-angle}deg)`; // Rotate arrow
+            
+            const compassDegrees = document.getElementById('compass-degrees');
+            if (angle >= 337.5 || angle < 22.5) compassDegrees.textContent = 'N';
+            else if (angle >= 22.5 && angle < 67.5) compassDegrees.textContent = 'NE';
+            else if (angle >= 67.5 && angle < 112.5) compassDegrees.textContent = 'E';
+            else if (angle >= 112.5 && angle < 157.5) compassDegrees.textContent = 'SE';
+            else if (angle >= 157.5 && angle < 202.5) compassDegrees.textContent = 'S';
+            else if (angle >= 202.5 && angle < 247.5) compassDegrees.textContent = 'SW';
+            else if (angle >= 247.5 && angle < 292.5) compassDegrees.textContent = 'W';
+            else if (angle >= 292.5 && angle < 337.5) compassDegrees.textContent = 'NW';
+        }
+
+        function updateInfoPanel() {
+            // Get the camera's current position in spherical coordinates relative to the earth's center
+            const cameraPos = new THREE.Vector3();
+            camera.getWorldPosition(cameraPos);
+
+            const distanceToEarthCenter = cameraPos.length();
+            const altitude = distanceToEarthCenter - 5; // Assuming earth radius is 5
+            
+            // Convert camera position to latitude and longitude for display
+            // This is simplified and might not perfectly align with true lat/lng on Earth's surface under the camera.
+            const lat = 90 - (Math.acos(cameraPos.y / distanceToEarthCenter)) * 180 / Math.PI;
+            let lng = (Math.atan2(cameraPos.z, cameraPos.x)) * 180 / Math.PI;
+            if (lng < 0) lng += 360; // Normalize longitude to 0-360 if desired
+
+            document.getElementById('latitude').textContent = `${lat.toFixed(2)}°`;
+            document.getElementById('longitude').textContent = `${lng.toFixed(2)}°`;
+            document.getElementById('altitude').textContent = `${altitude.toFixed(2)} km`;
+            
+            // Simplified view angle (camera's field of view)
+            document.getElementById('view-angle').textContent = `${camera.fov.toFixed(0)}°`;
+        }
+
+        function updateLoadingText(text) {
+            document.getElementById('loading-text').textContent = text;
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            TWEEN.update(); // Update tween animations
+            
+            if (isRotating) {
+                earthMesh.rotation.y += 0.0005; // Adjust rotation speed
+                cloudsMesh.rotation.y += 0.0006; // Clouds rotate slightly faster
+            }
+            controls.update(); // Required if controls.enableDamping or controls.autoRotate are set to true
+
+            renderer.render(scene, camera);
+            updateCompass();
+            updateInfoPanel();
+        }
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        // Initialize the application
+        init();
+    </script>
+</body>
+</html>
