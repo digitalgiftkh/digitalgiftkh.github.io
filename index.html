@@ -89,8 +89,6 @@
       box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
       position: relative;
       width: 280px;
-      display: flex;
-      flex-direction: column;
     }
     
     .product-card:hover {
@@ -102,16 +100,12 @@
       height: 200px;
       overflow: hidden;
       position: relative;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      background: #f8f9fa;
     }
     
     .product-image img {
-      max-width: 100%;
-      max-height: 100%;
-      object-fit: contain;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
       transition: transform 0.5s ease;
     }
     
@@ -548,20 +542,24 @@
         const productCard = document.createElement('div');
         productCard.className = 'product-card';
         productCard.setAttribute('data-category', product.category);
-        productCard.setAttribute('data-product-id', product.id);
+        
+        // Get the first variation image for the main product image
+        const mainImage = product.variations && product.variations.length > 0 
+          ? product.variations[0].image 
+          : product.image;
         
         let productHTML = `
           <div class="product-image">
             ${product.discount > 0 ? `<div class="discount-badge">${product.discount}% OFF</div>` : ''}
             ${product.comingSoon ? `<div class="coming-soon-badge">Coming Soon</div>` : ''}
-            <img src="${product.image}" alt="${product.name}" class="product-main-image">
+            <img src="${mainImage}" alt="${product.name}" class="product-main-image">
           </div>
           <div class="product-info">
             <h3>${product.name}</h3>
             <p>${product.description}</p>
         `;
         
-        // Add variations if they exist
+        // Add variations if they exist - MODIFIED: Always show if there are variations
         if (product.variations && product.variations.length > 0) {
           productHTML += `
             <div class="variations">
@@ -611,7 +609,7 @@
         productsContainer.appendChild(productCard);
       });
       
-      // Add event listeners to color options
+      // Add event listeners to color options - but only for products with multiple variations
       const colorOptions = document.querySelectorAll('.color-option:not(.single-option)');
       colorOptions.forEach(option => {
         option.addEventListener('click', function() {
