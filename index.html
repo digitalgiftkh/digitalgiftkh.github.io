@@ -89,6 +89,8 @@
       box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
       position: relative;
       width: 280px;
+      display: flex;
+      flex-direction: column;
     }
     
     .product-card:hover {
@@ -100,12 +102,16 @@
       height: 200px;
       overflow: hidden;
       position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: #f8f9fa;
     }
     
     .product-image img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
       transition: transform 0.5s ease;
     }
     
@@ -542,6 +548,7 @@
         const productCard = document.createElement('div');
         productCard.className = 'product-card';
         productCard.setAttribute('data-category', product.category);
+        productCard.setAttribute('data-product-id', product.id);
         
         let productHTML = `
           <div class="product-image">
@@ -554,7 +561,7 @@
             <p>${product.description}</p>
         `;
         
-        // Add variations if they exist - MODIFIED: Always show if there are variations
+        // Add variations if they exist
         if (product.variations && product.variations.length > 0) {
           productHTML += `
             <div class="variations">
@@ -604,7 +611,7 @@
         productsContainer.appendChild(productCard);
       });
       
-      // Add event listeners to color options - but only for products with multiple variations
+      // Add event listeners to color options
       const colorOptions = document.querySelectorAll('.color-option:not(.single-option)');
       colorOptions.forEach(option => {
         option.addEventListener('click', function() {
