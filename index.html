@@ -70,15 +70,14 @@
       grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
       gap: 25px;
       margin-bottom: 50px;
-      justify-items: center; /* Center items in grid */
+      justify-items: center;
     }
     
-    /* New class for when we have few products */
     .products-grid.few-products {
       display: flex;
       flex-wrap: wrap;
       justify-content: center;
-      gap: 25px; /* Explicit gap for flex layout */
+      gap: 25px;
     }
     
     .product-card {
@@ -89,7 +88,7 @@
       border: 1px solid rgba(106, 90, 205, 0.2);
       box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
       position: relative;
-      width: 280px; /* Fixed width for consistent sizing */
+      width: 280px;
     }
     
     .product-card:hover {
@@ -250,6 +249,87 @@
       color: #b19cd9;
     }
     
+    /* Variation styles */
+    .variations {
+      margin: 15px 0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .variation-label {
+      font-size: 13px;
+      color: #5a5a7a;
+      font-weight: 500;
+    }
+    
+    .color-options {
+      display: flex;
+      gap: 8px;
+    }
+    
+    .color-option {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      position: relative;
+    }
+    
+    .color-option:hover {
+      transform: scale(1.1);
+    }
+    
+    .color-option.active {
+      border: 2px solid #6a5acd;
+      transform: scale(1.1);
+    }
+    
+    .color-option.active::after {
+      content: '';
+      position: absolute;
+      top: -5px;
+      left: -5px;
+      right: -5px;
+      bottom: -5px;
+      border-radius: 50%;
+      border: 1px solid #6a5acd;
+    }
+    
+    .tooltip {
+      position: absolute;
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0, 0, 0, 0.8);
+      color: white;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      white-space: nowrap;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.2s ease;
+      margin-bottom: 5px;
+    }
+    
+    .color-option:hover .tooltip {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    /* Single variation style */
+    .color-option.single-option {
+      cursor: default;
+    }
+    
+    .color-option.single-option:hover {
+      transform: scale(1);
+    }
+    
     /* Responsive styles */
     @media (max-width: 768px) {      
       .products-grid:not(.few-products) {
@@ -257,10 +337,9 @@
       }
       
       .product-card {
-        width: 250px; /* Adjusted for smaller screens */
+        width: 250px;
       }
       
-      /* Ensure few-products layout works on medium screens */
       .products-grid.few-products {
         gap: 20px;
       }
@@ -285,7 +364,6 @@
         font-size: 28px;
       }
       
-      /* For single column layout */
       .products-grid:not(.few-products) {
         grid-template-columns: 1fr;
         justify-items: center;
@@ -296,7 +374,6 @@
         max-width: 320px;
       }
       
-      /* Ensure few-products still works on very small screens */
       .products-grid.few-products .product-card {
         width: 100%;
         max-width: 320px;
@@ -331,7 +408,6 @@
         </div>
     </header>
 
-    
     <section class="page-title">
       <h2>Our Digital Products</h2>
       <p>Discover our collection of unique digital gifts perfect for any occasion</p>
@@ -365,29 +441,57 @@
       ],
       products: [
         {
-          id: 1,
-          name: "Digital Love Letter",
-          description: "A beautifully crafted digital love letter that you can personalize with your own words, photo, and song.",
-          category: "love",
-          price: 4.90,
-          originalPrice: 7.00,
-          discount: 30,
-          image: "https://images.unsplash.com/photo-1563241527-3004b7be0ffd?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTB8fGNvbmdyYXR1bGF0aW9uc3xlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&w=500&q=60",
-          comingSoon: false
+            id: 1,
+            name: "Digital Love Letter",
+            description: "A beautifully crafted digital love letter that you can personalize with your own words, photo, and song.",
+            category: "love",
+            price: 4.90,
+            originalPrice: 7.00,
+            discount: 30,
+            image: "https://images.unsplash.com/photo-1563241527-3004b7be0ffd?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTB8fGNvbmdyYXR1bGF0aW9uc3xlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&w=500&q=60",
+            comingSoon: false,
+            variations: [
+              {
+                id: "original",
+                name: "Original",
+                color: "#ff6b8b",
+                image: "https://images.unsplash.com/photo-1563241527-3004b7be0ffd?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTB8fGNvbmdyYXR1bGF0aW9uc3xlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&w=500&q=60"
+              },
+              {
+                id: "forest",
+                name: "Forest Theme",
+                color: "#4caf50",
+                image: "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8Zm9yZXN0fGVufDB8fDB8fHww&auto=format&fit=crop&w=500&q=60"
+              },
+              {
+                id: "moon",
+                name: "Moon Theme",
+                color: "#9e9e9e",
+                image: "https://images.unsplash.com/photo-1532974297617-c0f05fe48bff?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8bW9vbiUyMG5pZ2h0fGVufDB8fDB8fHww&auto=format&fit=crop&w=500&q=60"
+              }
+
+            ]
         },
         {
-        id: 2,
-        name: "Digital Memory Map",
-        description: "An interactive map that lets you share special memories, photos, and notes in one beautiful digital space.",
-        category: "memory",
-        price: 9.99,
-        originalPrice: null,
-        discount: 0,
-        image: "https://images.unsplash.com/photo-1547826039-bfc35e0f1ea8?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTF8fHZpZGVvJTIwbWVzc2FnZXxlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&w=500&q=60",
-        comingSoon: true
+            id: 2,
+            name: "Digital Memory Map",
+            description: "An interactive map that lets you share special memories, photos, and notes in one beautiful digital space.",
+            category: "memory",
+            price: 9.99,
+            originalPrice: null,
+            discount: 0,
+            image: "https://images.unsplash.com/photo-1547826039-bfc35e0f1ea8?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTF8fHZpZGVvJTIwbWVzc2FnZXxlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&w=500&q=60",
+            comingSoon: true,
+            variations: [
+              {
+                id: "original",
+                name: "Original",
+                color: "#6a5acd",
+                image: "https://images.unsplash.com/photo-1547826039-bfc35e0f1ea8?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTF8fHZpZGVvJTIwbWVzc2FnZXxlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&w=500&q=60"
+              }
+            ]
         },
-
-    ]
+        ]
     };
 
     // Function to generate categories from the data
@@ -442,11 +546,40 @@
           <div class="product-image">
             ${product.discount > 0 ? `<div class="discount-badge">${product.discount}% OFF</div>` : ''}
             ${product.comingSoon ? `<div class="coming-soon-badge">Coming Soon</div>` : ''}
-            <img src="${product.image}" alt="${product.name}">
+            <img src="${product.image}" alt="${product.name}" class="product-main-image">
           </div>
           <div class="product-info">
             <h3>${product.name}</h3>
             <p>${product.description}</p>
+        `;
+        
+        // Add variations if they exist - MODIFIED: Always show if there are variations
+        if (product.variations && product.variations.length > 0) {
+          productHTML += `
+            <div class="variations">
+              <span class="variation-label">Theme:</span>
+              <div class="color-options">
+          `;
+          
+          product.variations.forEach((variation, index) => {
+            const isActive = index === 0 ? 'active' : '';
+            // Add single-option class if there's only one variation
+            const isSingleOption = product.variations.length === 1 ? 'single-option' : '';
+            productHTML += `
+              <div class="color-option ${isActive} ${isSingleOption}" 
+                   style="background-color: ${variation.color}"
+                   data-product-id="${product.id}" 
+                   data-variation-id="${variation.id}"
+                   data-image="${variation.image}">
+                <div class="tooltip">${variation.name}</div>
+              </div>
+            `;
+          });
+          
+          productHTML += `</div></div>`;
+        }
+        
+        productHTML += `
             <div class="product-price">
               <span class="price">
         `;
@@ -468,6 +601,26 @@
         
         productCard.innerHTML = productHTML;
         productsContainer.appendChild(productCard);
+      });
+      
+      // Add event listeners to color options - but only for products with multiple variations
+      const colorOptions = document.querySelectorAll('.color-option:not(.single-option)');
+      colorOptions.forEach(option => {
+        option.addEventListener('click', function() {
+          // Remove active class from all options in the same product
+          const productId = this.getAttribute('data-product-id');
+          const sameProductOptions = document.querySelectorAll(`.color-option[data-product-id="${productId}"]`);
+          sameProductOptions.forEach(opt => opt.classList.remove('active'));
+          
+          // Add active class to clicked option
+          this.classList.add('active');
+          
+          // Change the product image
+          const variationImage = this.getAttribute('data-image');
+          const productCard = this.closest('.product-card');
+          const productImage = productCard.querySelector('.product-main-image');
+          productImage.src = variationImage;
+        });
       });
     }
 
