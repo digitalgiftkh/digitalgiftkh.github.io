@@ -49,6 +49,7 @@
 
     .page-title {
       text-align: center;
+      margin-top: 10px
       margin-bottom: 40px;
     }
     
@@ -260,7 +261,7 @@
           <p>A beautifully crafted digital love letter that you can personalize with your own words and photos.</p>
           <div class="product-price">
             <span class="price">$14.99</span>
-            <button class="add-to-cart">Add to Cart</button>
+            <button class="add-to-cart">Contact Us</button>
           </div>
         </div>
       </div>
@@ -275,7 +276,7 @@
           <p>A fun and celebratory birthday video message featuring personalized animations and music.</p>
           <div class="product-price">
             <span class="price">$19.99</span>
-            <button class="add-to-cart">Add to Cart</button>
+            <button class="add-to-cart">Contact Us</button>
           </div>
         </div>
       </div>
@@ -290,7 +291,7 @@
           <p>Create a beautiful digital photo album to celebrate your special anniversary with custom designs.</p>
           <div class="product-price">
             <span class="price">$24.99</span>
-            <button class="add-to-cart">Add to Cart</button>
+            <button class="add-to-cart">Contact Us</button>
           </div>
         </div>
       </div>
@@ -305,7 +306,7 @@
           <p>Elegant animated e-card perfect for graduation, promotion, or any achievement worth celebrating.</p>
           <div class="product-price">
             <span class="price">$9.99</span>
-            <button class="add-to-cart">Add to Cart</button>
+            <button class="add-to-cart">Contact Us</button>
           </div>
         </div>
       </div>
@@ -330,17 +331,6 @@
         categoryButtons.forEach(btn => btn.classList.remove('active'));
         this.classList.add('active');
         // Here you would typically filter products based on category
-      });
-    });
-    
-    // Add to cart functionality
-    const addToCartButtons = document.querySelectorAll('.add-to-cart');
-    addToCartButtons.forEach(button => {
-      button.addEventListener('click', function() {
-        const product = this.closest('.product-card');
-        const productName = product.querySelector('h3').textContent;
-        alert(`${productName} added to cart!`);
-        // Here you would typically add the product to a shopping cart
       });
     });
   </script>
