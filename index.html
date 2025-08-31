@@ -14,8 +14,8 @@
     }
     
     body {
-      background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
-      color: #e6e6ff;
+      background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
+      color: #4a4a4a;
       min-height: 100vh;
       padding: 20px;
     }
@@ -31,7 +31,7 @@
       align-items: center;
       padding: 20px 0;
       margin-bottom: 30px;
-      border-bottom: 1px solid rgba(177, 156, 217, 0.3);
+      border-bottom: 1px solid rgba(106, 90, 205, 0.2);
     }
     
     .logo {
@@ -42,7 +42,7 @@
     
     .logo h1 {
       font-size: 28px;
-      background: linear-gradient(90deg, #b19cd9, #e6e6ff);
+      background: linear-gradient(90deg, #6a5acd, #b19cd9);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       font-weight: 700;
@@ -50,7 +50,7 @@
     
     .logo-icon {
       font-size: 32px;
-      color: #b19cd9;
+      color: #6a5acd;
     }
     
     nav ul {
@@ -60,7 +60,7 @@
     }
     
     nav a {
-      color: #e6e6ff;
+      color: #5a5a7a;
       text-decoration: none;
       font-weight: 500;
       transition: all 0.3s ease;
@@ -69,8 +69,8 @@
     }
     
     nav a:hover, nav a.active {
-      background: rgba(177, 156, 217, 0.2);
-      color: #b19cd9;
+      background: rgba(106, 90, 205, 0.1);
+      color: #6a5acd;
     }
     
     .page-title {
@@ -81,13 +81,13 @@
     .page-title h2 {
       font-size: 36px;
       margin-bottom: 10px;
-      background: linear-gradient(90deg, #ff9aa2, #fad0c4);
+      background: linear-gradient(90deg, #6a5acd, #b19cd9);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
     }
     
     .page-title p {
-      color: #b19cd9;
+      color: #6a5acd;
       max-width: 600px;
       margin: 0 auto;
       line-height: 1.6;
@@ -101,17 +101,17 @@
     }
     
     .product-card {
-      background: linear-gradient(145deg, #1a1a2e, #16213e);
+      background: white;
       border-radius: 15px;
       overflow: hidden;
       transition: transform 0.3s ease, box-shadow 0.3s ease;
-      border: 1px solid rgba(106, 90, 205, 0.3);
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+      border: 1px solid rgba(106, 90, 205, 0.2);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
     }
     
     .product-card:hover {
       transform: translateY(-5px);
-      box-shadow: 0 10px 25px rgba(106, 90, 205, 0.4);
+      box-shadow: 0 10px 25px rgba(106, 90, 205, 0.15);
     }
     
     .product-image {
@@ -137,11 +137,11 @@
     .product-info h3 {
       font-size: 20px;
       margin-bottom: 10px;
-      color: #fad0c4;
+      color: #6a5acd;
     }
     
     .product-info p {
-      color: #c5c5e4;
+      color: #5a5a7a;
       line-height: 1.5;
       margin-bottom: 15px;
       font-size: 14px;
@@ -156,7 +156,7 @@
     
     .price {
       font-weight: 700;
-      color: #b19cd9;
+      color: #6a5acd;
       font-size: 18px;
     }
     
@@ -185,9 +185,9 @@
     }
     
     .category-btn {
-      background: rgba(177, 156, 217, 0.1);
-      color: #e6e6ff;
-      border: 1px solid rgba(177, 156, 217, 0.3);
+      background: rgba(106, 90, 205, 0.1);
+      color: #6a5acd;
+      border: 1px solid rgba(106, 90, 205, 0.3);
       padding: 10px 20px;
       border-radius: 25px;
       cursor: pointer;
@@ -203,8 +203,8 @@
       text-align: center;
       padding: 30px 0;
       margin-top: 50px;
-      border-top: 1px solid rgba(177, 156, 217, 0.3);
-      color: #b19cd9;
+      border-top: 1px solid rgba(106, 90, 205, 0.2);
+      color: #6a5acd;
     }
     
     .social-icons {
@@ -215,7 +215,7 @@
     }
     
     .social-icons a {
-      color: #e6e6ff;
+      color: #6a5acd;
       font-size: 20px;
       transition: color 0.3s ease;
     }
@@ -232,11 +232,12 @@
         top: 80px;
         left: 0;
         width: 100%;
-        background: linear-gradient(135deg, #0f0c29, #302b63);
+        background: white;
         flex-direction: column;
         padding: 20px;
         gap: 15px;
         z-index: 100;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
       }
       
       nav ul.show {
@@ -350,36 +351,6 @@
           <p>Elegant animated e-card perfect for graduation, promotion, or any achievement worth celebrating.</p>
           <div class="product-price">
             <span class="price">$9.99</span>
-            <button class="add-to-cart">Add to Cart</button>
-          </div>
-        </div>
-      </div>
-      
-      <!-- Product 5 -->
-      <div class="product-card">
-        <div class="product-image">
-          <img src="https://images.unsplash.com/photo-1531058020387-3be344556be6?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTd8fHJvbWFudGljJTIwZ2lmdHxlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&w=500&q=60" alt="Romantic Digital Scrapbook">
-        </div>
-        <div class="product-info">
-          <h3>Romantic Digital Scrapbook</h3>
-          <p>A beautifully designed digital scrapbook to document your relationship milestones and memories.</p>
-          <div class="product-price">
-            <span class="price">$29.99</span>
-            <button class="add-to-cart">Add to Cart</button>
-          </div>
-        </div>
-      </div>
-      
-      <!-- Product 6 -->
-      <div class="product-card">
-        <div class="product-image">
-          <img src="https://images.unsplash.com/photo-1579389083078-4e7018379f7e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NDB8fGdpZnQlMjBjYXJkfGVufDB8fDB8fHww&auto=format&fit=crop&w=500&q=60" alt="Custom Poem">
-        </div>
-        <div class="product-info">
-          <h3>Personalized Poem</h3>
-          <p>A heartfelt, custom-written poem tailored to your relationship and delivered as a beautiful digital card.</p>
-          <div class="product-price">
-            <span class="price">$12.99</span>
             <button class="add-to-cart">Add to Cart</button>
           </div>
         </div>
