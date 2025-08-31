@@ -80,6 +80,7 @@
       transition: transform 0.3s ease, box-shadow 0.3s ease;
       border: 1px solid rgba(106, 90, 205, 0.2);
       box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+      position: relative;
     }
     
     .product-card:hover {
@@ -90,6 +91,7 @@
     .product-image {
       height: 200px;
       overflow: hidden;
+      position: relative;
     }
     
     .product-image img {
@@ -101,6 +103,19 @@
     
     .product-card:hover .product-image img {
       transform: scale(1.05);
+    }
+    
+    .discount-badge {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: linear-gradient(90deg, #ff6b6b, #ff8e8e);
+      color: white;
+      padding: 5px 10px;
+      border-radius: 15px;
+      font-size: 12px;
+      font-weight: bold;
+      z-index: 1;
     }
     
     .product-info {
@@ -131,6 +146,13 @@
       font-weight: 700;
       color: #6a5acd;
       font-size: 18px;
+    }
+    
+    .original-price {
+      text-decoration: line-through;
+      color: #999;
+      font-size: 14px;
+      margin-right: 5px;
     }
     
     .contact-us {
@@ -254,13 +276,17 @@
       <!-- Product 1 -->
       <div class="product-card">
         <div class="product-image">
+          <div class="discount-badge">20% OFF</div>
           <img src="https://images.unsplash.com/photo-1563241527-3004b7be0ffd?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTB8fGNvbmdyYXR1bGF0aW9uc3xlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&w=500&q=60" alt="Congratulations e-Card">
         </div>
         <div class="product-info">
           <h3>Digital Love Letter</h3>
           <p>A beautifully crafted digital love letter that you can personalize with your own words, photo, and song.</p>
           <div class="product-price">
-            <span class="price">$6.99</span>
+            <span class="price">
+              <span class="original-price">$8.99</span>
+              $6.99
+            </span>
             <button class="contact-us">Contact Us</button>
           </div>
         </div>
@@ -316,8 +342,7 @@
       <div class="social-icons">
         <a href="#"><i class="fab fa-facebook-f"></i></a>
         <a href="#"><i class="fab fa-instagram"></i></a>
-        <a href="#"><i class="fab fa-twitter"></i></a>
-        <a href="#"><i class="fab fa-pinterest"></i></a>
+        <a href="#"><i class="fab fa-tiktok"></i></a>
       </div>
       <p>&copy; 2025 Digital Gift KH. All rights reserved.</p>
     </footer>
