@@ -72,6 +72,13 @@
       margin-bottom: 50px;
     }
     
+    /* New class for when we have few products */
+    .products-grid.few-products {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    
     .product-card {
       background: white;
       border-radius: 15px;
@@ -80,6 +87,7 @@
       border: 1px solid rgba(106, 90, 205, 0.2);
       box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
       position: relative;
+      width: 280px; /* Fixed width for flex layout */
     }
     
     .product-card:hover {
@@ -245,6 +253,10 @@
       .products-grid {
         grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
       }
+      
+      .product-card {
+        width: 250px; /* Adjusted for smaller screens */
+      }
     }
     
     @media (max-width: 480px) {
@@ -256,8 +268,13 @@
         font-size: 28px;
       }
       
-      .products-grid {
+      .products-grid:not(.few-products) {
         grid-template-columns: 1fr;
+      }
+      
+      .product-card {
+        width: 100%; /* Full width on very small screens */
+        max-width: 280px; /* But limit maximum width */
       }
       
       .categories {
@@ -373,6 +390,13 @@
       const productsContainer = document.getElementById('products-container');
       productsContainer.innerHTML = '';
       
+      // Check if we have few products (2-3) and apply special class
+      if (storeData.products.length <= 3) {
+        productsContainer.classList.add('few-products');
+      } else {
+        productsContainer.classList.remove('few-products');
+      }
+      
       storeData.products.forEach(product => {
         const productCard = document.createElement('div');
         productCard.className = 'product-card';
@@ -414,18 +438,24 @@
     // Function to filter products by category
     function filterProducts(category) {
       const productCards = document.querySelectorAll('.product-card');
+      const productsContainer = document.getElementById('products-container');
+      let visibleCount = 0;
       
       productCards.forEach(card => {
-        if (category === 'all') {
+        if (category === 'all' || card.getAttribute('data-category') === category) {
           card.style.display = 'block';
+          visibleCount++;
         } else {
-          if (card.getAttribute('data-category') === category) {
-            card.style.display = 'block';
-          } else {
-            card.style.display = 'none';
-          }
+          card.style.display = 'none';
         }
       });
+      
+      // Apply centering if we have few products (2-3)
+      if (visibleCount <= 3) {
+        productsContainer.classList.add('few-products');
+      } else {
+        productsContainer.classList.remove('few-products');
+      }
     }
 
     // Initialize the page
