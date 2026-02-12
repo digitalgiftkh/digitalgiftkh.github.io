@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>For You ❤️</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #ffe6e6; /* Cute pink background */
+            font-family: 'Arial', sans-serif;
+            overflow: hidden; /* Prevents scrolling when button gets huge */
+        }
+        .container {
+            text-align: center;
+            position: relative;
+        }
+        h1 {
+            color: #d32f2f;
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+        }
+        .gif-container img {
+            max-width: 300px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+        .btn-container {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        button {
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        #yesBtn {
+            background-color: #4CAF50; /* Green */
+            color: white;
+            font-weight: bold;
+        }
+        #noBtn {
+            background-color: #f44336; /* Red */
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="gif-container">
+            <img id="mainImage" src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExbmM5cHZ2aXN0cDl5aHZ4czU4bWx4aHZ4czU4bWx4aHZ4czU4bWx4aCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/cLS1cfxvGOPVpf9g3y/giphy.gif" alt="Cute Bear">
+        </div>
+        
+        <h1 id="question">Will you be my Valentine?</h1>
+        
+        <div class="btn-container">
+            <button id="yesBtn" onclick="acceptLove()">Yes</button>
+            <button id="noBtn" onclick="rejectLove()">No</button>
+        </div>
+    </div>
+
+    <script>
+        let noClickCount = 0;
+        const phrases = [
+            "No",
+            "Are you sure?",
+            "Really sure?",
+            "Think again!",
+            "Last chance!",
+            "Surely not?",
+            "You might regret this!",
+            "Give it another thought!",
+            "Are you absolutely certain?",
+            "This could be a mistake!",
+            "Have a heart!",
+            "Don't be so cold!",
+            "Change of heart?",
+            "Wouldn't you reconsider?",
+            "Is that your final answer?",
+            "You're breaking my heart ;(",
+            "Plsss? :("
+        ];
+
+        function rejectLove() {
+            noClickCount++;
+            
+            // 1. Make the Yes button bigger
+            const yesBtn = document.getElementById("yesBtn");
+            const currentSize = parseFloat(window.getComputedStyle(yesBtn).fontSize);
+            yesBtn.style.fontSize = `${currentSize * 1.5}px`;
+            
+            // 2. Change the text on the No button
+            const noBtn = document.getElementById("noBtn");
+            // Loop through phrases, or stick to the last one if we run out
+            const index = Math.min(noClickCount, phrases.length - 1);
+            noBtn.innerText = phrases[index];
+        }
+
+        function acceptLove() {
+            document.getElementById("question").innerText = "Yay! See you on the 14th! ❤️";
+            document.getElementById("mainImage").src = "https://media.giphy.com/media/T86i6yDyOYz7J6dPhf/giphy.gif"; // Cute hugging gif
+            
+            // Hide buttons
+            document.getElementById("yesBtn").style.display = "none";
+            document.getElementById("noBtn").style.display = "none";
+            
+            // Launch confetti (optional simple effect via CSS/JS could be added here)
+        }
+    </script>
+</body>
+</html>
